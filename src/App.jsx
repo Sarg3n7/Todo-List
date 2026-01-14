@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { TodoProvider } from "./context/TodoContext.js";
+import TodoForm from "./components/TodoForm.jsx";
+import TodoItem from "./components/TodoItem.jsx";
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -15,8 +17,22 @@ function App() {
   }
 
   const toggleChecker = (id) => {
-    setTodos((prev) => prev.map((prevTodo) => prevTodo === id ? {...prevTodo, checked: !prevTodo.checked} : prevTodo))
+    setTodos((prev) => prev.map((prevTodo) => prevTodo.id === id ? {...prevTodo, checked: !prevTodo.checked} : prevTodo))
   }
+
+  useEffect(() => {
+    const todos = JSON.parse(localStorage.getItem('todos'))
+
+    if(todos && todos.length > 0){
+      setTodos(todos)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos))
+  },[todos])
+
+
   return (
     <TodoProvider value={{todos, addTodo, updateTodo, deleteTodo, toggleChecker}}>
       <div className="bg-[#172842] min-h-screen py-8">
@@ -24,9 +40,15 @@ function App() {
           <h1 className="text-2xl font-bold text-center mb-8 mt-2">
             Manage Your Todos
           </h1>
-          <div className="mb-4">{/* Todo form goes here */}</div>
+          <div className="mb-4">
+            <TodoForm/>
+          </div>
           <div className="flex flex-wrap gap-y-3">
-            {/*Loop and Add TodoItem here */}
+            {todos.map((todo) => (
+              <div key={todo.id} className="w-full">
+                <TodoItem todo={todo}/>
+              </div>
+            ))}
           </div>
         </div>
       </div>
